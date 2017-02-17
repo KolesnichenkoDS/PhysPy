@@ -1,3 +1,8 @@
+'''
+PhysPy is a SymPy-based Python library for calculating error percentage for
+measured values.
+'''
+
 from collections import Iterable, namedtuple as _
 import math
 
@@ -6,47 +11,78 @@ import sympy as sym
 from ._abs import Abs
 
 class Value:
+    '''
+    An abstract class that represents either measured or dependent value.
+
+    **Note**: PhysPy values override arithmetic operators (`+`, `-`, `*`, `/`, `**`) and `abs` function.
+    '''
+
     def __init__(self):
         raise NotImplementedError
 
     def approx(self):
+        '''
+        Calculate the average value.
+        '''
         raise NotImplementedError
 
     def apply(self, fn):
+        '''
+        Apply a function to the value.
+        
+        **Note**: the passed function must operate with SymPy values, not any Python objects.
+        '''
         raise NotImplementedError
 
-    def __add__(self, other):
-        return DependentValue(symbol(self) + symbol(other), values(self, other))
+    def absolute_error(self, probability):
+        '''
+        Calculate the absolute error.
+        '''
+        raise NotImplementedError
 
-    def __sub__(self, other):
-        return DependentValue(symbol(self) - symbol(other), values(self, other))
-
-    def __mul__(self, other):
-        return DependentValue(symbol(self) * symbol(other), values(self, other))
-
-    def __truediv__(self, other):
-        return DependentValue(symbol(self) / symbol(other), values(self, other))
-
-    def __pow__(self, other):
-        return DependentValue(symbol(self) ** symbol(other), values(self, other))
-
-    def __neg__(self):
-        return DependentValue(-symbol(self), values(self))
-
-    def __abs__(self):
-        return self.apply(Abs)
-
-    def show(self, probability):
-        return '{0} +/- {1} ({2}%)'.format(
+    def show(self, probability, unicode=False):
+        '''
+        Show the average value and error percentage in readable format.
+        '''
+        symbol = '\u00b1' if unicode else '+/-'
+        return '{0} {1} {2} ({3}%)'.format(
             _round(self.approx(), 2),
+            symbol,
             _round(self.absolute_error(probability), 2),
             _round(self.relative_error(probability) * 100, 1),
         )
     
     def relative_error(self, probability):
+        '''
+        Calculate the relative error.
+        '''
         return abs(self.absolute_error(probability) / self.approx())
 
+    def __add__(self, other):
+        return DependentValue(get_symbol(self) + get_symbol(other), values(self, other))
+
+    def __sub__(self, other):
+        return DependentValue(get_symbol(self) - get_symbol(other), values(self, other))
+
+    def __mul__(self, other):
+        return DependentValue(get_symbol(self) * get_symbol(other), values(self, other))
+
+    def __truediv__(self, other):
+        return DependentValue(get_symbol(self) / get_symbol(other), values(self, other))
+
+    def __pow__(self, other):
+        return DependentValue(get_symbol(self) ** get_symbol(other), values(self, other))
+
+    def __neg__(self):
+        return DependentValue(-get_symbol(self), values(self))
+
+    def __abs__(self):
+        return self.apply(Abs)
+
 class NamedValue(Value):
+    '''
+    Named measured value.
+    '''
     def __init__(self, name, values, ierr):
         self.values = values
         self.name = name
@@ -57,6 +93,9 @@ class NamedValue(Value):
         return sum(self.values) / len(self.values)
 
     def rmsd(self):
+        '''
+        Calculate root-mean-square deviation.
+        '''
         a = self.approx()
         n = len(self.values)
         if n > 1:
@@ -105,7 +144,7 @@ class DependentValue(Value):
         return math.sqrt(sum(ds))
 
     def apply(self, fn):
-        return DependentValue(fn(symbol(self)), self.values)
+        return DependentValue(fn(get_symbol(self)), self.values)
 
 def _round(x, n):
     if x < 0:
@@ -151,21 +190,33 @@ def coef(probability, n):
         (100, .95): 2.0,
     }[n, probability]
 
-def value(name, val, ierr):
-    if isinstance(val, Value):
-        return NamedValue(name, val.values, ierr)
-    if isinstance(val, Iterable):
-        return NamedValue(name, val, ierr)
-    return NamedValue(name, [val], ierr)
+def value(name, value, ierr):
+    '''
+    Construct a `NamedValue` from values list and instrument drift.
+    '''
 
-def constant(name, val):
-    return NamedValue(name, [val], 0)
+    if isinstance(value, NamedValue):
+        return NamedValue(name, value.values, ierr)
+    if isinstance(value, Iterable):
+        return NamedValue(name, value, ierr)
+    return NamedValue(name, [value], ierr)
 
-def val(name, vals, ierr):
+def constant(name, value):
+    '''
+    Construct a constant `NamedValue`.
+    '''
+
+    return NamedValue(name, [value], 0)
+
+def val(name, values, ierr):
+    '''
+    Create a global variable that refers to a `NamedValue`.
+    '''
+
     from inspect import currentframe
     frame = currentframe().f_back
 
-    v = value(name, vals, ierr)
+    v = value(name, values, ierr)
 
     try:
         frame.f_globals[v.name] = v
@@ -174,11 +225,15 @@ def val(name, vals, ierr):
 
     return v
 
-def const(name, val):
+def const(name, value):
+    '''
+    Create a global variable that refers to a constant `NamedValue`.
+    '''
+
     from inspect import currentframe
     frame = currentframe().f_back
 
-    v = constant(name, val)
+    v = constant(name, value)
 
     try:
         frame.f_globals[v.name] = v
@@ -197,12 +252,12 @@ def values(*args):
                 res.append(v_)
     return res
 
-def symbol(v):
-    if isinstance(v, Value):
-        return v.symbol
-    return v
+def get_symbol(value):
+    if isinstance(value, valalue):
+        return value.symbol
+    return value
 
-def get_value(val):
-    if isinstance(val, Value):
-        return val.approx()
-    return val
+def get_value(value):
+    if isinstance(value, Value):
+        return value.approx()
+    return value

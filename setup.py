@@ -18,7 +18,16 @@ setup(
     license='MIT',
     packages=['physpy'],
     install_requires=[
+        'pdoc',
         'sympy',
     ],
     test_suite='setup.physpy_test_suite',
 )
+
+import os, pdoc
+
+if not os.path.exists('docs'):
+    os.makedirs('docs')
+
+with open('docs/index.html', 'w') as f:
+    f.write(pdoc.html('physpy', source=False))
