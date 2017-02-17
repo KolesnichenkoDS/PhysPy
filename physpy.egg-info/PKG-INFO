@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: physpy
+Version: 0.1
+Summary: A SymPy-based library for calculating the error percentage for measured values
+Home-page: http://github.com/KolesnichenkoDS/physpy
+Author: Daniil Kolesnichenko
+Author-email: d.s.kolesnichenko@ya.ru
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
