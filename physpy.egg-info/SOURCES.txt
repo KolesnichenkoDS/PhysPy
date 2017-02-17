@@ -1,8 +1,0 @@
-setup.py
-physpy/__init__.py
-physpy/abs.py
-physpy.egg-info/PKG-INFO
-physpy.egg-info/SOURCES.txt
-physpy.egg-info/dependency_links.txt
-physpy.egg-info/requires.txt
-physpy.egg-info/top_level.txt
