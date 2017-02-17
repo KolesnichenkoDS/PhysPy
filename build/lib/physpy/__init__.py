@@ -3,7 +3,7 @@ import math
 
 import sympy as sym
 
-from ._abs import Abs
+from .sympy_abs import Abs
 
 class Value:
     def __init__(self):
