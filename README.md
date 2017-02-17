@@ -18,4 +18,4 @@ sudo python3 setup.py install
 
 ## Usage
 
-API docs can be found [here](https://kolesnichenkods.github.io/PhysPy).
+API docs can be found [here](https://kolesnichenkods.github.io/PhysPy/).
