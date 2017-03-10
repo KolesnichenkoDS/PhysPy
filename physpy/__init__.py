@@ -24,6 +24,7 @@ class Value:
         '''
         Calculate the average value.
         '''
+
         raise NotImplementedError
 
     def apply(self, fn):
@@ -32,6 +33,7 @@ class Value:
         
         **Note**: the passed function must operate with SymPy values, not any Python objects.
         '''
+
         raise NotImplementedError
 
     def absolute_error(self, probability):
@@ -44,6 +46,7 @@ class Value:
         '''
         Show the average value and error percentage in readable format.
         '''
+
         symbol = '\u00b1' if unicode else '+/-'
         return '{0} {1} {2} ({3}%)'.format(
             _round(self.approx(), 2),
@@ -56,6 +59,7 @@ class Value:
         '''
         Calculate the relative error.
         '''
+
         return abs(self.absolute_error(probability) / self.approx())
 
     def __add__(self, other):
@@ -83,6 +87,7 @@ class NamedValue(Value):
     '''
     Named measured value.
     '''
+
     def __init__(self, name, values, ierr):
         self.values = values
         self.name = name
@@ -96,6 +101,7 @@ class NamedValue(Value):
         '''
         Calculate root-mean-square deviation.
         '''
+
         a = self.approx()
         n = len(self.values)
         if n > 1:
@@ -117,6 +123,10 @@ class NamedValue(Value):
         return DependentValue(fn(self.symbol), [self])
 
 class DependentValue(Value):
+    '''
+    A value that depends on other values.
+    '''
+
     def __init__(self, symbol, values):
         self.symbol = symbol
         self.values = [v for v in values if isinstance(v, NamedValue)]
@@ -174,7 +184,7 @@ def mapvalue_lazy(name, values, ierr):
 mapvalue.lazy = mapvalue_lazy
 
 def coef(probability, n):
-    # TODO: calculate Student coef for **any** probability
+    if n == 1: return 1
     return {
         (2, .95): 12.7,
         (3, .95): 4.3,
@@ -253,7 +263,7 @@ def values(*args):
     return res
 
 def get_symbol(value):
-    if isinstance(value, valalue):
+    if isinstance(value, Value):
         return value.symbol
     return value
 

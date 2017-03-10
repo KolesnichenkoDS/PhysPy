@@ -12,7 +12,7 @@ setup(
     name='physpy',
     version='0.1.0',
     description='A SymPy-based library for calculating the error percentage for measured values',
-    url='http://github.com/KolesnichenkoDS/PhysPy',
+    url='https://kolesnichenkods.github.io/PhysPy/',
     author='Daniil Kolesnichenko',
     author_email='d.s.kolesnichenko@ya.ru',
     license='MIT',
