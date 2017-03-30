@@ -10,7 +10,7 @@ def physpy_test_suite():
 
 setup(
     name='physpy',
-    version='0.1.0',
+    version='0.1.1',
     description='A SymPy-based library for calculating the error percentage for measured values',
     url='https://kolesnichenkods.github.io/PhysPy/',
     author='Daniil Kolesnichenko',
